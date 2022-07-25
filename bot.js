@@ -2,7 +2,7 @@ const {
   Client,
   GatewayIntentBits,
   EmbedBuilder,
-  Embed,
+  PermissionFlagsBits,
 } = require("discord.js");
 
 const validURL = require("valid-url");
@@ -49,38 +49,43 @@ client.on("messageCreate", (message) => {
     const [cmd, ...args] = message.content.slice(prefix.length).split(" ");
 
     if (cmd === "review") {
-      if (!args[1])
-        return message.channel.send({
-          embeds: [
-            failEmbed.setDescription(
-              `Please mention the channel after the type of assignment!`
-            ),
-          ],
-        });
+      if (
+        message.member.permissions.has(PermissionFlagsBits.ManageChannels) ||
+        message.member.permissions.has(PermissionFlagsBits.Administrator)
+      ) {
+        if (!args[1])
+          return message.channel.send({
+            embeds: [
+              failEmbed.setDescription(
+                `Please mention the channel after the type of assignment!`
+              ),
+            ],
+          });
 
-      const type = args[0];
-      const channel = args[1].slice(2, args[1].length - 1);
+        const type = args[0];
+        const channel = args[1].slice(2, args[1].length - 1);
 
-      if (type === "submit") {
-        subChannel = channel;
-        let channelName = message.guild.channels.cache.get(subChannel);
-        return message.channel.send({
-          embeds: [
-            successEmbed.setDescription(
-              `The submission channel is set to ${channelName}`
-            ),
-          ],
-        });
-      } else if (type === "fb") {
-        fbChannel = channel;
-        let channelName = message.guild.channels.cache.get(fbChannel);
-        return message.channel.send({
-          embeds: [
-            successEmbed.setDescription(
-              `The feedback channel is set to ${channelName}`
-            ),
-          ],
-        });
+        if (type === "submit") {
+          subChannel = channel;
+          let channelName = message.guild.channels.cache.get(subChannel);
+          return message.channel.send({
+            embeds: [
+              successEmbed.setDescription(
+                `The submission channel is set to ${channelName}`
+              ),
+            ],
+          });
+        } else if (type === "fb") {
+          fbChannel = channel;
+          let channelName = message.guild.channels.cache.get(fbChannel);
+          return message.channel.send({
+            embeds: [
+              successEmbed.setDescription(
+                `The feedback channel is set to ${channelName}`
+              ),
+            ],
+          });
+        }
       }
     }
   }
