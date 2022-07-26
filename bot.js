@@ -46,13 +46,40 @@ client.on("messageCreate", (message) => {
   });
 
   if (message.content.startsWith(prefix)) {
-    const [cmd, ...args] = message.content.slice(prefix.length).split(" ");
+    const [cmd, ...args] = message.content.slice(prefix.length).split(/\s+/);
 
     if (cmd === "review") {
       if (
         message.member.permissions.has(PermissionFlagsBits.ManageChannels) ||
         message.member.permissions.has(PermissionFlagsBits.Administrator)
       ) {
+        if (!args[0])
+          return message.channel.send({
+            embeds: [
+              failEmbed.setDescription(
+                "Please mention the type of argument you want to use! \nUse the `>review help` for details on how to use the review command"
+              ),
+            ],
+          });
+        if (args[0] === "help") {
+          const setEmbed = new EmbedBuilder()
+            .setColor("Fuchsia")
+            .setThumbnail(message.guild.iconURL())
+            .setTitle("Review help")
+            .setDescription(
+              "A feature which puts up a poll for people to vote and give their feedback on how the reviewing work is. \n"
+            )
+            .setFields(
+              { name: "help", value: "```>review help```" },
+              { name: "submit", value: "```>review submit #[channel-name]```" },
+              {
+                name: "fb",
+                value: "```>review fb #[channel-name]```",
+              }
+            );
+          return message.channel.send({ embeds: [setEmbed] });
+        }
+
         if (!args[1])
           return message.channel.send({
             embeds: [
@@ -64,7 +91,6 @@ client.on("messageCreate", (message) => {
 
         const type = args[0];
         const channel = args[1].slice(2, args[1].length - 1);
-
         if (type === "submit") {
           subChannel = channel;
           let channelName = message.guild.channels.cache.get(subChannel);
